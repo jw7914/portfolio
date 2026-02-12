@@ -65,15 +65,15 @@ const App = () => {
 
   const FloatingNav = () => (
     <nav className="fixed inset-x-0 top-6 z-[9999] mx-auto w-fit">
-      <div className="flex items-center space-x-4 rounded-full border border-gray-700 bg-gray-900/50 px-4 py-2 backdrop-blur-md">
+      <div className="flex items-center space-x-2 sm:space-x-4 rounded-full border border-gray-700 bg-gray-900/50 px-2 py-2 sm:px-4 backdrop-blur-md">
         {navigation.map((item) => (
           <a
             key={item.name}
             href={item.href}
-            className="flex items-center space-x-2 rounded-full px-4 py-2 text-sm font-medium text-gray-300 transition-colors duration-200 hover:bg-gray-800 hover:text-white"
+            className="flex items-center space-x-1 sm:space-x-2 rounded-full px-3 py-2 sm:px-4 text-sm font-medium text-gray-300 transition-colors duration-200 hover:bg-gray-800 hover:text-white"
           >
             {item.icon}
-            <span>{item.name}</span>
+            <span className="hidden sm:block">{item.name}</span>
           </a>
         ))}
       </div>

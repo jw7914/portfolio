@@ -33,6 +33,10 @@ const skillsData = [
         name: "Bash",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg",
       },
+      {
+        name: "SQL",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg",
+      },
     ],
   },
   {
@@ -51,6 +55,10 @@ const skillsData = [
         name: "Node.js",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
       },
+      {
+        name: "FastAPI",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg",
+      },
     ],
   },
   {
@@ -63,6 +71,26 @@ const skillsData = [
            {
             name: "Linux",
              icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg"
+           },
+           {
+            name: "Vite",
+            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg"
+           },
+           {
+            name: "MySQL",
+            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg"
+           },
+           {
+            name: "PostgreSQL",
+            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg"
+           },
+           {
+            name: "Supabase",
+            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg"
+           },
+           {
+            name: "Firebase",
+            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg"
            }
       ]
   }
@@ -73,13 +101,13 @@ import { CometCard } from "../ui/comet-card";
 const SkillCard = ({ name, icon, iconClassName }) => {
   return (
     <CometCard className="w-full h-full cursor-pointer">
-      <div className="group relative flex items-center justify-between p-6 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 w-full h-full">
+      <div className="group relative flex items-center justify-between p-3 md:p-6 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 w-full h-full">
         <div className="relative z-10">
-          <span className="text-xl font-bold text-gray-100 group-hover:text-purple-400 transition-colors">
+          <span className="text-sm md:text-xl font-bold text-gray-100 group-hover:text-purple-400 transition-colors">
             {name}
           </span>
         </div>
-        <div className="relative z-10 w-12 h-12">
+        <div className="relative z-10 w-8 h-8 md:w-12 md:h-12">
           <img
             src={icon}
             alt={name}
@@ -116,7 +144,7 @@ export const SkillsSection = () => {
             <h3 className="text-xl font-semibold text-purple-400 border-b border-gray-800 pb-2 mb-4">
               {category.category}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6 justify-items-center">
               {category.skills.map((skill, skillIdx) => (
                 <SkillCard key={skillIdx} {...skill} />
               ))}
