@@ -17,8 +17,8 @@ import {
 } from "./components/final/animated-buttons";
 import { WavyBackground } from "./components/ui/wavy-background";
 import { ContainerScroll } from "./components/ui/container-scroll-animation";
-import { CardsCarousel } from "./components/final/cards-carousel";
-import ProjectCards from "./components/final/project-cards";
+import ProjectScroll from "./components/final/project-scroll";
+import ExperienceTimeline from "./components/final/experience-timeline";
 import { MovingSkillCards } from "./components/final/moving-cards";
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -139,25 +139,25 @@ const App = () => {
       {/* Experiences Section */}
       <section
         id="experience"
-        className="relative py-42 md:py-60 max-w-6xl mx-auto flex flex-col items-center justify-center overflow-visible"
+        className="relative py-20 px-4 md:px-8 max-w-7xl mx-auto flex flex-col items-center justify-center overflow-visible"
       >
-        <SectionTitle className="relative z-10 text-center m-0 p-0 mb-[50px]">
-          Experience
-        </SectionTitle>
-        <div className="relative z-10 w-full flex flex-col items-center m-0 p-0">
-          <ContainerScroll>
-            <CardsCarousel />
-          </ContainerScroll>
-        </div>
+        <ExperienceTimeline />
       </section>
 
       {/* Projects Section */}
       <WavyBackground>
-        <section id="projects" className="py-42 md:py-60 p-8 max-w-6xl mx-auto">
-          <SectionTitle>Projects</SectionTitle>
-          <div className="flex flex-col overflow-hidden">
-            <ProjectCards></ProjectCards>
-          </div>
+        <section id="projects" className="py-20 md:py-40 relative z-10 w-full flex flex-col items-center justify-center overflow-hidden">
+          <ContainerScroll
+            titleComponent={
+              <>
+                <h1 className="text-4xl font-semibold text-white dark:text-white mb-10">
+                  Projects
+                </h1>
+              </>
+            }
+          >
+            <ProjectScroll />
+          </ContainerScroll>
         </section>
       </WavyBackground>
 
