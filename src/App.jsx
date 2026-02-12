@@ -19,7 +19,7 @@ import { WavyBackground } from "./components/ui/wavy-background";
 import { ContainerScroll } from "./components/ui/container-scroll-animation";
 import ProjectScroll from "./components/final/project-scroll";
 import ExperienceTimeline from "./components/final/experience-timeline";
-import { MovingSkillCards } from "./components/final/moving-cards";
+import { SkillsSection } from "./components/final/skills-section";
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
@@ -162,10 +162,7 @@ const App = () => {
       </WavyBackground>
 
       {/* Skills Section */}
-      <section id="skills" className="py-42 md:py-60 p-8 max-w-6xl mx-auto">
-        <SectionTitle>Skills</SectionTitle>
-        <MovingSkillCards></MovingSkillCards>
-      </section>
+      <SkillsSection />
 
       {/* Contact Section */}
       <section id="contact" className="py-42 md:py-60 p-8 max-w-2xl mx-auto">
