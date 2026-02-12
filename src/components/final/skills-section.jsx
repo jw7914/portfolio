@@ -96,7 +96,7 @@ const SkillCard = ({ name, icon, iconClassName }) => {
 
 export const SkillsSection = () => {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 py-20">
+    <section id="skills" className="w-full max-w-7xl mx-auto px-4 py-20">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-400">
           Technical Skills

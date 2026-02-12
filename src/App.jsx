@@ -2,13 +2,13 @@ import React, { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import {
   ArrowUpRight,
-  Code,
   Folder,
   Mail,
   User,
   Github,
   Linkedin,
   Briefcase,
+  Cpu,
 } from "lucide-react";
 import { TypeWriterName } from "./components/final/typewriter-text";
 import {
@@ -52,6 +52,7 @@ const App = () => {
     { name: "About", href: "#about", icon: <User size={16} /> },
     { name: "Experience", href: "#experience", icon: <Briefcase size={16} /> },
     { name: "Projects", href: "#projects", icon: <Folder size={16} /> },
+    { name: "Skills", href: "#skills", icon: <Cpu size={16} /> },
   ];
 
   const SectionTitle = ({ children, className = "" }) => (
