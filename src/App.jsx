@@ -1,12 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import {
-  ArrowUpRight,
   Folder,
   Mail,
   User,
-  Github,
-  Linkedin,
   Briefcase,
   Cpu,
 } from "lucide-react";
@@ -20,6 +17,7 @@ import { ContainerScroll } from "./components/ui/container-scroll-animation";
 import ProjectScroll from "./components/final/project-scroll";
 import ExperienceTimeline from "./components/final/experience-timeline";
 import { SkillsSection } from "./components/final/skills-section";
+import { GithubPage } from "./components/final/github-page";
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
@@ -27,9 +25,18 @@ const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC;
 
 const App = () => {
   const form = useRef();
+  const [pathname, setPathname] = useState(window.location.pathname);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const handleRouteChange = () => setPathname(window.location.pathname);
+
+    window.addEventListener("popstate", handleRouteChange);
+
+    return () => window.removeEventListener("popstate", handleRouteChange);
+  }, []);
 
   const sendEmail = (e) => {
     e.preventDefault();
@@ -37,12 +44,12 @@ const App = () => {
     setSuccess(false);
     setError(false);
     emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current, PUBLIC_KEY).then(
-      (result) => {
+      () => {
         setLoading(false);
         setSuccess(true);
         form.current.reset();
       },
-      (error) => {
+      () => {
         setLoading(false);
         setError(true);
       }
@@ -80,6 +87,10 @@ const App = () => {
     </nav>
   );
 
+  if (pathname === "/github") {
+    return <GithubPage />;
+  }
+
   return (
     <div
       className="min-h-screen bg-gray-950 text-gray-300 antialiased font-inter"
@@ -108,9 +119,7 @@ const App = () => {
           </p>
           <div className="mt-8 flex justify-center space-x-4">
             <a
-              href="https://github.com/jw7914"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/github"
               aria-label="GitHub"
             >
               <GithubButton></GithubButton>

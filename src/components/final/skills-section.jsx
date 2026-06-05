@@ -1,9 +1,9 @@
 import React from "react";
-import { motion } from "motion/react";
 
 const skillsData = [
   {
     category: "Languages",
+    summary: "Comfortable across frontend, backend, scripting, and data work.",
     skills: [
       {
         name: "JavaScript",
@@ -29,7 +29,7 @@ const skillsData = [
         name: "CSS",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg",
       },
-       {
+      {
         name: "Bash",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg",
       },
@@ -40,11 +40,13 @@ const skillsData = [
     ],
   },
   {
-    category: "Frameworks & Libraries",
+    category: "Frameworks",
+    summary: "Tools I use to build fast, maintainable web and API experiences.",
     skills: [
       {
         name: "React",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+        featured: true,
       },
       {
         name: "Flask",
@@ -54,6 +56,7 @@ const skillsData = [
       {
         name: "Node.js",
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+        featured: true,
       },
       {
         name: "FastAPI",
@@ -62,95 +65,130 @@ const skillsData = [
     ],
   },
   {
-      category: "Tools & Others",
-      skills: [
-           {
-            name: "Git",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg"
-           },
-           {
-            name: "Linux",
-             icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg"
-           },
-           {
-            name: "Vite",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg"
-           },
-           {
-            name: "MySQL",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg"
-           },
-           {
-            name: "PostgreSQL",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg"
-           },
-           {
-            name: "Supabase",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg"
-           },
-           {
-            name: "Firebase",
-            icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg"
-           }
-      ]
-  }
+    category: "Tools & Platforms",
+    summary: "Version control, databases, deployment tooling, and cloud services.",
+    skills: [
+      {
+        name: "Git",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
+        featured: true,
+      },
+      {
+        name: "Linux",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg",
+      },
+      {
+        name: "Vite",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg",
+      },
+      {
+        name: "MySQL",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg",
+      },
+      {
+        name: "PostgreSQL",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
+        featured: true,
+      },
+      {
+        name: "Supabase",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg",
+      },
+      {
+        name: "Firebase",
+        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
+      },
+    ],
+  },
 ];
 
-import { CometCard } from "../ui/comet-card";
+const featuredSkills = skillsData
+  .flatMap((group) => group.skills)
+  .filter((skill) => skill.featured);
 
-const SkillCard = ({ name, icon, iconClassName }) => {
-  return (
-    <CometCard className="w-full h-full cursor-pointer">
-      <div className="group relative flex items-center justify-between p-3 md:p-6 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 w-full h-full">
-        <div className="relative z-10">
-          <span className="text-sm md:text-xl font-bold text-gray-100 group-hover:text-purple-400 transition-colors">
-            {name}
-          </span>
-        </div>
-        <div className="relative z-10 w-8 h-8 md:w-12 md:h-12">
-          <img
-            src={icon}
-            alt={name}
-            className={`w-full h-full object-contain filter drop-shadow-lg transition-transform duration-300 group-hover:scale-110 ${
-              iconClassName || ""
-            }`}
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
-      </div>
-    </CometCard>
-  );
-};
+const SkillPill = ({ name, icon, iconClassName }) => (
+  <li className="group flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-gray-200 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-950/80 ring-1 ring-white/10">
+      <img
+        src={icon}
+        alt=""
+        aria-hidden="true"
+        className={`h-4.5 w-4.5 object-contain transition-transform duration-200 group-hover:scale-110 ${
+          iconClassName || ""
+        }`}
+      />
+    </span>
+    <span className="truncate font-medium">{name}</span>
+  </li>
+);
+
+const FeaturedSkill = ({ name, icon, iconClassName }) => (
+  <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/60 px-4 py-3">
+    <img
+      src={icon}
+      alt=""
+      aria-hidden="true"
+      className={`h-8 w-8 object-contain ${iconClassName || ""}`}
+    />
+    <span className="text-sm font-semibold text-white">{name}</span>
+  </div>
+);
 
 export const SkillsSection = () => {
   return (
-    <section id="skills" className="w-full max-w-7xl mx-auto px-4 py-20">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-400">
-          Technical Skills
-        </h2>
-      </div>
+    <section id="skills" className="relative w-full overflow-hidden px-4 py-20">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">
+              Technical toolkit
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+              Skills without the clutter.
+            </h2>
+          </div>
+          <p className="max-w-xl text-sm leading-6 text-gray-400 md:text-base">
+            A focused snapshot of the languages, frameworks, databases, and
+            tooling I reach for when building practical software.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {skillsData.map((category, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.1 }}
-            className="space-y-4"
-          >
-            <h3 className="text-xl font-semibold text-purple-400 border-b border-gray-800 pb-2 mb-4">
-              {category.category}
+        <div className="mb-8 rounded-xl border border-white/10 bg-gradient-to-r from-gray-900 via-gray-900/80 to-cyan-950/30 p-4 shadow-2xl shadow-black/30 md:p-5">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
+              Core stack
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6 justify-items-center">
-              {category.skills.map((skill, skillIdx) => (
-                <SkillCard key={skillIdx} {...skill} />
-              ))}
-            </div>
-          </motion.div>
-        ))}
+            <span className="hidden h-px flex-1 bg-gradient-to-r from-white/10 to-transparent sm:block" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredSkills.map((skill) => (
+              <FeaturedSkill key={skill.name} {...skill} />
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {skillsData.map((group) => (
+            <article
+              key={group.category}
+              className="rounded-xl border border-white/10 bg-gray-900/45 p-5 shadow-xl shadow-black/20"
+            >
+              <div className="mb-5">
+                <h3 className="text-lg font-semibold text-white">
+                  {group.category}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-gray-400">
+                  {group.summary}
+                </p>
+              </div>
+              <ul className="flex flex-wrap gap-2.5">
+                {group.skills.map((skill) => (
+                  <SkillPill key={skill.name} {...skill} />
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
