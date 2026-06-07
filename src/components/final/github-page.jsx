@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -12,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { Terminal } from "../ui/terminal";
+import { Keyboard } from "../ui/keyboard";
 
 const GITHUB_USERNAME = "jw7914";
 const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
@@ -53,15 +61,64 @@ const LanguageBar = ({ language, count, rank, total }) => {
 };
 
 export const GithubPage = () => {
+  const terminalRef = useRef(null);
+  const contentAreaRef = useRef(null);
+  const terminalPanelRef = useRef(null);
+  const keyboardPanelRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [repos, setRepos] = useState([]);
   const [terminalPath, setTerminalPath] = useState("~");
   const [componentPath, setComponentPath] = useState(null);
   const [showComponent, setShowComponent] = useState(false);
+  const [dockKeyboard, setDockKeyboard] = useState(false);
 
   const showPreview = () => {
     setShowComponent(true);
   };
+
+  const handleVirtualKeyboardKey = useCallback((key) => {
+    terminalRef.current?.sendKey(key);
+  }, []);
+
+  useLayoutEffect(() => {
+    const updateKeyboardPlacement = () => {
+      const terminalPanel = terminalPanelRef.current;
+      const keyboardPanel = keyboardPanelRef.current;
+      const contentArea = contentAreaRef.current;
+
+      if (!terminalPanel || !keyboardPanel || !contentArea) return;
+
+      const contentAreaRect = contentArea.getBoundingClientRect();
+      const terminalHeight = terminalPanel.offsetHeight;
+      const keyboardHeight = keyboardPanel.offsetHeight;
+      const bottomPadding = window.innerWidth >= 768 ? 32 : 24;
+      const gap = 20;
+      const availableHeight =
+        window.innerHeight - contentAreaRect.top - bottomPadding;
+      const neededHeight = terminalHeight + gap + keyboardHeight;
+
+      setDockKeyboard(neededHeight > availableHeight);
+    };
+
+    updateKeyboardPlacement();
+
+    const resizeObserver = new ResizeObserver(updateKeyboardPlacement);
+    if (contentAreaRef.current) {
+      resizeObserver.observe(contentAreaRef.current);
+    }
+    if (terminalPanelRef.current) {
+      resizeObserver.observe(terminalPanelRef.current);
+    }
+    if (keyboardPanelRef.current) {
+      resizeObserver.observe(keyboardPanelRef.current);
+    }
+
+    window.addEventListener("resize", updateKeyboardPlacement);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateKeyboardPlacement);
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -578,7 +635,11 @@ export const GithubPage = () => {
   ) : null;
 
   return (
-    <main className="min-h-screen bg-gray-950 px-4 py-6 text-gray-300 antialiased md:px-6 md:py-8">
+    <main
+      className={`min-h-screen bg-gray-950 px-4 pt-6 text-gray-300 antialiased md:px-6 md:pt-8 ${
+        dockKeyboard ? "pb-44 md:pb-56 lg:pb-64" : "pb-6 md:pb-8"
+      }`}
+    >
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl flex-col">
         <header className="mb-5 flex h-11 items-center justify-between gap-3 rounded-lg border border-white/10 bg-gray-900/55 px-3 shadow-lg shadow-black/20">
           <a
@@ -604,19 +665,40 @@ export const GithubPage = () => {
           </a>
         </header>
 
-        <div className="flex flex-1 items-center">
+        <div ref={contentAreaRef} className="flex flex-1 items-center">
         <section className="w-full space-y-5">
-          <Terminal
-            username={`${GITHUB_USERNAME}@portfolio`}
-            className="max-w-none px-0"
-            currentPath="~"
-            enableSound={false}
-            initialLines={terminalIntro}
-            inputPlaceholder="ls"
-            interactive
-            autocompleteOptions={currentTerminalDirectory.files || []}
-            onCommand={handleTerminalCommand}
-          />
+          <div ref={terminalPanelRef}>
+            <Terminal
+              ref={terminalRef}
+              username={`${GITHUB_USERNAME}@portfolio`}
+              className="max-w-none px-0"
+              currentPath={terminalPath}
+              enableSound={false}
+              initialLines={terminalIntro}
+              inputPlaceholder="ls"
+              interactive
+              autocompleteOptions={currentTerminalDirectory.files || []}
+              onCommand={handleTerminalCommand}
+            />
+          </div>
+
+          <div
+            ref={keyboardPanelRef}
+            className={
+              dockKeyboard
+                ? "fixed right-0 bottom-0 left-0 z-40 border-t border-purple-500/20 bg-gray-950/95 px-2 pt-3 pb-4 shadow-2xl shadow-black/50 backdrop-blur"
+                : "px-2 pt-1 pb-0"
+            }
+          >
+            <div className="mx-auto max-w-[360px] overflow-x-auto md:max-w-[580px] lg:max-w-[760px]">
+              <Keyboard
+                capturePhysicalKeys
+                className="![zoom:0.82] sm:![zoom:0.9] md:![zoom:1.2] lg:![zoom:1.55]"
+                enableSound
+                onKeyPress={handleVirtualKeyboardKey}
+              />
+            </div>
+          </div>
 
           {componentView && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-6">

@@ -1,5 +1,13 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/utils";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
 
@@ -257,7 +265,8 @@ function SyntaxHighlightedText({ text }) {
   );
 }
 
-export function Terminal({
+export const Terminal = forwardRef(function Terminal(
+  {
   commands = ["npx shadcn@latest init"],
   outputs = {},
   username = "Manus-Macbook",
@@ -273,7 +282,9 @@ export function Terminal({
   delayBetweenCommands = 800,
   initialDelay = 500,
   enableSound = true,
-}) {
+  },
+  ref,
+) {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const inputRef = useRef(null);
@@ -399,9 +410,7 @@ export function Terminal({
     }
   }, [lines, phase, inputValue]);
 
-  const commitInteractiveCommand = (event) => {
-    event.preventDefault();
-
+  const submitInteractiveCommand = useCallback(() => {
     const command = inputValue.trim();
     if (!command) return;
 
@@ -437,9 +446,14 @@ export function Terminal({
       ...nextLines,
     ]);
     setInputValue("");
+  }, [currentPath, down, inputValue, lines, onCommand, up]);
+
+  const commitInteractiveCommand = (event) => {
+    event.preventDefault();
+    submitInteractiveCommand();
   };
 
-  const getLongestCommonPrefix = (values) => {
+  const getLongestCommonPrefix = useCallback((values) => {
     if (values.length === 0) return "";
 
     return values.reduce((prefix, value) => {
@@ -449,9 +463,9 @@ export function Terminal({
       }
       return prefix.slice(0, index);
     });
-  };
+  }, []);
 
-  const completeInteractiveInput = () => {
+  const completeInteractiveInput = useCallback(() => {
     const rawValue = inputValue;
     const leadingWhitespace = rawValue.match(/^\s*/)?.[0] || "";
     const value = rawValue.trimStart();
@@ -513,7 +527,61 @@ export function Terminal({
         { type: "output", content: matches.join("    ") },
       ]);
     }
-  };
+  }, [autocompleteOptions, getLongestCommonPrefix, inputValue]);
+
+  const focusInteractiveInput = useCallback(() => {
+    if (interactive) inputRef.current?.focus();
+  }, [interactive]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      sendKey(key) {
+        if (!interactive) return;
+
+        if (key === "Enter") {
+          submitInteractiveCommand();
+          return;
+        }
+
+        if (key === "Backspace") {
+          down("Backspace");
+          window.setTimeout(() => up("Backspace"), 45);
+          setInputValue((value) => value.slice(0, -1));
+          return;
+        }
+
+        if (key === "Tab") {
+          down("Tab");
+          window.setTimeout(() => up("Tab"), 45);
+          completeInteractiveInput();
+          return;
+        }
+
+        if (key === "Escape") {
+          setInputValue("");
+          return;
+        }
+
+        if (key.length === 1) {
+          down(key);
+          window.setTimeout(() => up(key), 45);
+          setInputValue((value) => `${value}${key}`);
+        }
+      },
+      focus() {
+        focusInteractiveInput();
+      },
+    }),
+    [
+      completeInteractiveInput,
+      down,
+      focusInteractiveInput,
+      interactive,
+      submitInteractiveCommand,
+      up,
+    ],
+  );
 
   const handleInteractiveKeyDown = (event) => {
     if (event.key === "Tab") {
@@ -526,10 +594,6 @@ export function Terminal({
       down(event.key);
       window.setTimeout(() => up(event.key), 45);
     }
-  };
-
-  const focusInteractiveInput = () => {
-    if (interactive) inputRef.current?.focus();
   };
 
   const makePrompt = (path = "~") => (
@@ -664,4 +728,4 @@ export function Terminal({
       </div>
     </div>
   );
-}
+});
