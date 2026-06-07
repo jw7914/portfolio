@@ -20,7 +20,7 @@ export function TypeWriterName() {
     },
   ];
   return (
-    <div className="flex" style={{ width: "420px" }}>
+    <div className="flex w-[min(420px,100%)]">
       <TypewriterEffectSmooth words={words} />
     </div>
   );

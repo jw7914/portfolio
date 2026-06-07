@@ -277,6 +277,7 @@ export const Terminal = forwardRef(function Terminal(
   inputPlaceholder = "type a command",
   onCommand,
   terminalSlot,
+  contentClassName,
   autocompleteOptions = [],
   typingSpeed = 50,
   delayBetweenCommands = 800,
@@ -637,6 +638,7 @@ export const Terminal = forwardRef(function Terminal(
           className={cn(
             "no-visible-scrollbar h-80 overflow-y-auto p-4 font-mono",
             interactive && "cursor-text",
+            contentClassName,
           )}
           onClick={focusInteractiveInput}
         >

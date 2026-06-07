@@ -95,7 +95,7 @@ export const WavyBackground = ({
   return (
     <div
       className={cn(
-        "relative w-full flex flex-col items-center justify-center overflow-visible",
+        "relative w-full max-w-full flex flex-col items-center justify-center overflow-hidden",
         containerClassName
       )}
       style={{ minHeight: "unset", height: "auto" }}

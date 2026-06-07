@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -62,15 +61,11 @@ const LanguageBar = ({ language, count, rank, total }) => {
 
 export const GithubPage = () => {
   const terminalRef = useRef(null);
-  const contentAreaRef = useRef(null);
-  const terminalPanelRef = useRef(null);
-  const keyboardPanelRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [repos, setRepos] = useState([]);
   const [terminalPath, setTerminalPath] = useState("~");
   const [componentPath, setComponentPath] = useState(null);
   const [showComponent, setShowComponent] = useState(false);
-  const [dockKeyboard, setDockKeyboard] = useState(false);
 
   const showPreview = () => {
     setShowComponent(true);
@@ -78,46 +73,6 @@ export const GithubPage = () => {
 
   const handleVirtualKeyboardKey = useCallback((key) => {
     terminalRef.current?.sendKey(key);
-  }, []);
-
-  useLayoutEffect(() => {
-    const updateKeyboardPlacement = () => {
-      const terminalPanel = terminalPanelRef.current;
-      const keyboardPanel = keyboardPanelRef.current;
-      const contentArea = contentAreaRef.current;
-
-      if (!terminalPanel || !keyboardPanel || !contentArea) return;
-
-      const contentAreaRect = contentArea.getBoundingClientRect();
-      const terminalHeight = terminalPanel.offsetHeight;
-      const keyboardHeight = keyboardPanel.offsetHeight;
-      const bottomPadding = window.innerWidth >= 768 ? 32 : 24;
-      const gap = 20;
-      const availableHeight =
-        window.innerHeight - contentAreaRect.top - bottomPadding;
-      const neededHeight = terminalHeight + gap + keyboardHeight;
-
-      setDockKeyboard(neededHeight > availableHeight);
-    };
-
-    updateKeyboardPlacement();
-
-    const resizeObserver = new ResizeObserver(updateKeyboardPlacement);
-    if (contentAreaRef.current) {
-      resizeObserver.observe(contentAreaRef.current);
-    }
-    if (terminalPanelRef.current) {
-      resizeObserver.observe(terminalPanelRef.current);
-    }
-    if (keyboardPanelRef.current) {
-      resizeObserver.observe(keyboardPanelRef.current);
-    }
-
-    window.addEventListener("resize", updateKeyboardPlacement);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateKeyboardPlacement);
-    };
   }, []);
 
   useEffect(() => {
@@ -636,12 +591,10 @@ export const GithubPage = () => {
 
   return (
     <main
-      className={`min-h-screen bg-gray-950 px-4 pt-6 text-gray-300 antialiased md:px-6 md:pt-8 ${
-        dockKeyboard ? "pb-44 md:pb-56 lg:pb-64" : "pb-6 md:pb-8"
-      }`}
+      className="h-screen overflow-hidden bg-gray-950 px-4 py-5 text-gray-300 antialiased max-h-[560px]:py-3 sm:py-6 md:px-6 md:py-8"
     >
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl flex-col">
-        <header className="mb-5 flex h-11 items-center justify-between gap-3 rounded-lg border border-white/10 bg-gray-900/55 px-3 shadow-lg shadow-black/20">
+      <div className="mx-auto flex h-full max-w-6xl flex-col">
+        <header className="mb-4 flex h-11 shrink-0 items-center justify-between gap-3 rounded-lg border border-white/10 bg-gray-900/55 px-3 shadow-lg shadow-black/20 max-h-[560px]:mb-3 md:mb-5">
           <a
             href="/"
             className="inline-flex shrink-0 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-gray-300 transition hover:bg-white/[0.04] hover:text-white"
@@ -665,13 +618,14 @@ export const GithubPage = () => {
           </a>
         </header>
 
-        <div ref={contentAreaRef} className="flex flex-1 items-center">
-        <section className="w-full space-y-5">
-          <div ref={terminalPanelRef}>
+        <div className="flex min-h-0 flex-1 items-center">
+        <section className="flex max-h-full w-full flex-col justify-center gap-5 sm:gap-6 md:gap-7">
+          <div className="min-h-0">
             <Terminal
               ref={terminalRef}
               username={`${GITHUB_USERNAME}@portfolio`}
               className="max-w-none px-0"
+              contentClassName="h-[clamp(8rem,38vh,20rem)] sm:h-[clamp(10rem,40vh,20rem)]"
               currentPath={terminalPath}
               enableSound={false}
               initialLines={terminalIntro}
@@ -682,18 +636,11 @@ export const GithubPage = () => {
             />
           </div>
 
-          <div
-            ref={keyboardPanelRef}
-            className={
-              dockKeyboard
-                ? "fixed right-0 bottom-0 left-0 z-40 border-t border-purple-500/20 bg-gray-950/95 px-2 pt-3 pb-4 shadow-2xl shadow-black/50 backdrop-blur"
-                : "px-2 pt-1 pb-0"
-            }
-          >
-            <div className="mx-auto max-w-[360px] overflow-x-auto md:max-w-[580px] lg:max-w-[760px]">
+          <div className="flex shrink-0 justify-center px-0 pb-1">
+            <div className="w-fit max-w-full">
               <Keyboard
                 capturePhysicalKeys
-                className="![zoom:0.82] sm:![zoom:0.9] md:![zoom:1.2] lg:![zoom:1.55]"
+                className="![zoom:0.74] min-[380px]:![zoom:0.84] sm:![zoom:0.95] md:![zoom:1.2] lg:![zoom:1.5]"
                 enableSound
                 onKeyPress={handleVirtualKeyboardKey}
               />

@@ -93,7 +93,7 @@ const App = () => {
 
   return (
     <div
-      className="min-h-screen bg-gray-950 text-gray-300 antialiased font-inter"
+      className="min-h-screen max-w-full overflow-x-clip bg-gray-950 text-gray-300 antialiased font-inter"
       style={{ colorScheme: "dark" }}
     >
       <FloatingNav />
@@ -149,14 +149,14 @@ const App = () => {
       {/* Experiences Section */}
       <section
         id="experience"
-        className="relative py-20 px-4 md:px-8 max-w-7xl mx-auto flex flex-col items-center justify-center overflow-visible"
+        className="relative mx-auto flex max-w-7xl flex-col items-center justify-center overflow-hidden px-4 py-20 md:px-8"
       >
         <ExperienceTimeline />
       </section>
 
       {/* Projects Section */}
       <WavyBackground>
-        <section id="projects" className="py-20 md:py-40 relative z-10 w-full flex flex-col items-center justify-center overflow-hidden">
+        <section id="projects" className="relative z-10 flex w-full max-w-full flex-col items-center justify-center overflow-hidden py-20 md:py-40">
           <ContainerScroll
             titleComponent={
               <>

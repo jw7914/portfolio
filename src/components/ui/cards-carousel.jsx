@@ -74,9 +74,9 @@ export const Carousel = ({ items, initialScroll = 0 }) => {
     <CarouselContext.Provider
       value={{ onCardClose: handleCardClose, currentIndex }}
     >
-      <div className="relative w-full">
+      <div className="relative w-full max-w-full overflow-hidden">
         <div
-          className="flex w-full overflow-x-scroll overscroll-x-auto scroll-smooth py-10 [scrollbar-width:none] md:py-20"
+          className="flex w-full max-w-full overflow-x-auto overscroll-x-contain scroll-smooth py-10 [scrollbar-width:none] md:py-20"
           ref={carouselRef}
           onScroll={checkScrollability}
         >
@@ -88,7 +88,7 @@ export const Carousel = ({ items, initialScroll = 0 }) => {
 
           <div
             className={cn(
-              "flex flex-row justify-start gap-4 pl-4",
+              "flex max-w-full flex-row justify-start gap-4 px-4",
               // remove max-w-4xl if you want the carousel to span the full width of its container
               "mx-auto max-w-7xl"
             )}
@@ -110,14 +110,14 @@ export const Carousel = ({ items, initialScroll = 0 }) => {
                   },
                 }}
                 key={"card" + index}
-                className="rounded-3xl last:pr-[5%] md:last:pr-[33%]"
+                className="shrink-0 rounded-3xl last:pr-[5%] md:last:pr-[33%]"
               >
                 {item}
               </motion.div>
             ))}
           </div>
         </div>
-        <div className="mr-10 flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pr-4 md:pr-10">
           <button
             className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 disabled:opacity-50"
             onClick={scrollLeft}

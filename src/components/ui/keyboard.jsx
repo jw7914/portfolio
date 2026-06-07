@@ -24,6 +24,7 @@ import {
   IconVolume,
   IconVolume2,
   IconVolume3,
+  IconVolumeOff,
   IconSearch,
   IconWorld,
   IconCommand,
@@ -268,6 +269,103 @@ const KEY_INPUT_VALUES = {
   Digit0: "0",
 };
 
+const KEY_SOUND_DEFINE_IDS = {
+  Escape: "1",
+  Digit1: "2",
+  Digit2: "3",
+  Digit3: "4",
+  Digit4: "5",
+  Digit5: "6",
+  Digit6: "7",
+  Digit7: "8",
+  Digit8: "9",
+  Digit9: "10",
+  Digit0: "11",
+  Minus: "12",
+  Equal: "13",
+  Backspace: "14",
+  Tab: "15",
+  KeyQ: "16",
+  KeyW: "17",
+  KeyE: "18",
+  KeyR: "19",
+  KeyT: "20",
+  KeyY: "21",
+  KeyU: "22",
+  KeyI: "23",
+  KeyO: "24",
+  KeyP: "25",
+  BracketLeft: "26",
+  BracketRight: "27",
+  Enter: "28",
+  ControlLeft: "29",
+  KeyA: "30",
+  KeyS: "31",
+  KeyD: "32",
+  KeyF: "33",
+  KeyG: "34",
+  KeyH: "35",
+  KeyJ: "36",
+  KeyK: "37",
+  KeyL: "38",
+  Semicolon: "39",
+  Quote: "40",
+  Backquote: "41",
+  ShiftLeft: "42",
+  Backslash: "43",
+  KeyZ: "44",
+  KeyX: "45",
+  KeyC: "46",
+  KeyV: "47",
+  KeyB: "48",
+  KeyN: "49",
+  KeyM: "50",
+  Comma: "51",
+  Period: "52",
+  Slash: "53",
+  ShiftRight: "54",
+  AltLeft: "56",
+  Space: "57",
+  CapsLock: "58",
+  F1: "59",
+  F2: "60",
+  F3: "61",
+  F4: "62",
+  F5: "63",
+  F6: "64",
+  F7: "65",
+  F8: "66",
+  F9: "67",
+  F10: "68",
+  F11: "87",
+  F12: "88",
+  MetaLeft: "3675",
+  MetaRight: "3676",
+  AltRight: "3677",
+  Fn: "83",
+  ArrowUp: "57416",
+  ArrowLeft: "57419",
+  ArrowRight: "57421",
+  ArrowDown: "57424",
+};
+
+const getConfiguredSoundDef = (keyCode, phase, defines) => {
+  const defineId = KEY_SOUND_DEFINE_IDS[keyCode];
+  const soundDef = defineId ? defines?.[defineId] : null;
+
+  if (!soundDef) return null;
+
+  const [startMs, durationMs] = soundDef;
+  const pressDuration = Math.max(30, Math.round(durationMs * 0.52));
+
+  if (phase === "down") {
+    return [startMs, pressDuration];
+  }
+
+  const releaseOffset = Math.min(durationMs - 1, pressDuration);
+  return [startMs + releaseOffset, Math.max(30, durationMs - releaseOffset)];
+};
+
 const getKeyInputValue = (keyCode) => {
   if (!keyCode) return null;
   if (Object.prototype.hasOwnProperty.call(KEY_INPUT_VALUES, keyCode)) {
@@ -310,6 +408,8 @@ const KeyboardProvider = ({
   const [pressedKeys, setPressedKeys] = useState(new Set());
   const [lastPressedKey, setLastPressedKey] = useState(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
+  const [soundDefines, setSoundDefines] = useState(null);
+  const [muted, setMuted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const playFallbackClick = useCallback((frequency = 160, duration = 0.025) => {
@@ -337,18 +437,34 @@ const KeyboardProvider = ({
   useEffect(() => {
     if (!enableSound) return;
 
-    // Initialize AudioContext and load sound file
+    let cancelled = false;
+
+    // Initialize AudioContext and load the configured sound pack.
     const initAudio = async () => {
       try {
+        setSoundLoaded(false);
         audioContextRef.current = new AudioContext();
-        const response = await fetch("/sounds/sound.ogg");
-        if (!response.ok) {
-          console.warn("Sound file not available");
+
+        const configResponse = await fetch("/sounds/config.json");
+        if (!configResponse.ok) {
+          console.warn("Keyboard sound config not available");
           return;
         }
-        const arrayBuffer = await response.arrayBuffer();
+
+        const config = await configResponse.json();
+        const soundFile = config.sound || "sound.ogg";
+        const soundResponse = await fetch(`/sounds/${soundFile}`);
+        if (!soundResponse.ok) {
+          console.warn("Keyboard sound file not available");
+          return;
+        }
+
+        const arrayBuffer = await soundResponse.arrayBuffer();
         audioBufferRef.current =
           await audioContextRef.current.decodeAudioData(arrayBuffer);
+        if (cancelled) return;
+
+        setSoundDefines(config.defines || null);
         setSoundLoaded(true);
       } catch (error) {
         console.warn("Failed to load sound:", error);
@@ -358,16 +474,19 @@ const KeyboardProvider = ({
     initAudio();
 
     return () => {
+      cancelled = true;
       audioContextRef.current?.close();
     };
   }, [enableSound]);
 
   const playSoundDown = useCallback(
     (keyCode) => {
-      if (!enableSound) return;
+      if (!enableSound || muted) return;
       if (!audioContextRef.current) return;
 
-      const soundDef = SOUND_DEFINES_DOWN[keyCode];
+      const soundDef =
+        getConfiguredSoundDef(keyCode, "down", soundDefines) ||
+        SOUND_DEFINES_DOWN[keyCode];
       if (!soundDef || !audioBufferRef.current) {
         playFallbackClick();
         return;
@@ -387,15 +506,17 @@ const KeyboardProvider = ({
       source.connect(audioContextRef.current.destination);
       source.start(0, startTime, duration);
     },
-    [enableSound, playFallbackClick],
+    [enableSound, muted, playFallbackClick, soundDefines],
   );
 
   const playSoundUp = useCallback(
     (keyCode) => {
-      if (!enableSound) return;
+      if (!enableSound || muted) return;
       if (!audioContextRef.current) return;
 
-      const soundDef = SOUND_DEFINES_UP[keyCode];
+      const soundDef =
+        getConfiguredSoundDef(keyCode, "up", soundDefines) ||
+        SOUND_DEFINES_UP[keyCode];
       if (!soundLoaded || !soundDef || !audioBufferRef.current) {
         playFallbackClick(220, 0.018);
         return;
@@ -415,8 +536,12 @@ const KeyboardProvider = ({
       source.connect(audioContextRef.current.destination);
       source.start(0, startTime, duration);
     },
-    [enableSound, playFallbackClick, soundLoaded],
+    [enableSound, muted, playFallbackClick, soundDefines, soundLoaded],
   );
+
+  const toggleMuted = useCallback(() => {
+    setMuted((value) => !value);
+  }, []);
 
   const setPressed = useCallback((keyCode) => {
     setPressedKeys((prev) => new Set(prev).add(keyCode));
@@ -512,6 +637,9 @@ const KeyboardProvider = ({
         setReleased,
         emitKey,
         lastPressedKey,
+        muted,
+        soundEnabled: enableSound,
+        toggleMuted,
       }}
     >
       {children}
@@ -576,6 +704,34 @@ const KeystrokePreview = () => {
           </MotionDiv>
         )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+const MutePowerKey = () => {
+  const { muted, soundEnabled, toggleMuted } = useKeyboardSound();
+
+  if (!soundEnabled) return null;
+
+  return (
+    <div className="rounded-[4px] rounded-tr-xl p-[0.5px]">
+      <button
+        type="button"
+        aria-label={muted ? "Unmute keyboard sounds" : "Mute keyboard sounds"}
+        title={muted ? "Unmute keyboard sounds" : "Mute keyboard sounds"}
+        onClick={toggleMuted}
+        className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-[3.5px] rounded-tr-lg bg-gray-100 text-neutral-600 shadow-[0px_0px_1px_0px_rgba(0,0,0,0.5),0px_1px_1px_0px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(255,255,255,1)_inset] transition active:scale-[0.98]"
+      >
+        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-b from-neutral-300 via-neutral-200 to-neutral-300 p-px">
+          <span className="flex h-full w-full items-center justify-center rounded-full bg-neutral-100">
+            {muted ? (
+              <IconVolumeOff className="h-[9px] w-[9px]" />
+            ) : (
+              <IconVolume className="h-[9px] w-[9px]" />
+            )}
+          </span>
+        </span>
+      </button>
     </div>
   );
 };
@@ -671,11 +827,7 @@ export const Keypad = () => {
           <IconVolume className="h-[6px] w-[6px]" />
           <span className="mt-1">F12</span>
         </Key>
-        <Key containerClassName="rounded-tr-xl" className="rounded-tr-lg">
-          <div className="h-4 w-4 rounded-full bg-gradient-to-b from-neutral-300 via-neutral-200 to-neutral-300 p-px">
-            <div className="h-full w-full rounded-full bg-neutral-100" />
-          </div>
-        </Key>
+        <MutePowerKey />
       </Row>
       {/* Number Row */}
       <Row>

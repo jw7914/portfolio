@@ -41,7 +41,7 @@ export default function ProjectScroll() {
   const cards = projects.map((project, index) => (
     <div 
       key={index} 
-      className="group rounded-xl border border-gray-800 bg-gray-900/50 p-6 shadow-lg backdrop-blur-md transition-all duration-300 hover:border-gray-700 hover:bg-gray-900 w-[20rem] md:w-[30rem] h-[20rem] flex flex-col justify-between"
+      className="group flex h-[20rem] w-[min(20rem,calc(100vw-4rem))] flex-col justify-between rounded-xl border border-gray-800 bg-gray-900/50 p-6 shadow-lg backdrop-blur-md transition-all duration-300 hover:border-gray-700 hover:bg-gray-900 md:w-[30rem]"
     >
       <div>
         <div className="flex items-center space-x-3 mb-4">
@@ -73,7 +73,7 @@ export default function ProjectScroll() {
   ));
 
   return (
-    <div className="w-full h-full py-20">
+    <div className="h-full w-full max-w-full overflow-hidden py-20">
       <Carousel items={cards} />
     </div>
   );

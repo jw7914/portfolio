@@ -121,9 +121,14 @@ export const TypewriterEffectSmooth = ({
   };
 
   return (
-    <div className={cn("flex justify-center space-x-1 my-6 w-full", className)}>
+    <div
+      className={cn(
+        "my-6 flex w-full max-w-full min-w-0 justify-center space-x-1 overflow-hidden",
+        className
+      )}
+    >
       <motion.div
-        className="overflow-hidden pb-2"
+        className="max-w-full overflow-hidden pb-2"
         initial={{
           width: "0%",
         }}
@@ -137,7 +142,7 @@ export const TypewriterEffectSmooth = ({
         }}
       >
         <div
-          className="text-5xl font-bold text-center"
+          className="text-center text-4xl font-bold sm:text-5xl"
           style={{
             whiteSpace: "nowrap",
           }}

@@ -30,11 +30,11 @@ export const ContainerScroll = ({ titleComponent, children }) => {
 
   return (
     <div
-      className="h-auto flex items-center justify-center relative p-0 m-0"
+      className="relative m-0 flex h-auto w-full max-w-full items-center justify-center overflow-hidden p-0"
       ref={containerRef}
     >
       <div
-        className="p-0 m-0 w-full relative"
+        className="relative m-0 w-full max-w-full overflow-hidden p-0"
         style={{
           perspective: "1200px",
         }}
@@ -70,7 +70,7 @@ export const Card = ({ rotate, scale, children }) => {
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="w-[90vw] sm:w-[85vw] md:w-[80vw] max-w-md sm:max-w-4xl md:max-w-5xl lg:max-w-[70vw] -mt-8 sm:-mt-16 mx-auto h-[40rem] sm:h-[45rem] md:h-[50rem] border-4 border-[#6C6C6C] p-2 sm:p-4 md:p-12 bg-[#222222] rounded-[24px] sm:rounded-[32px] md:rounded-[40px] shadow-2xl"
+      className="mx-auto -mt-8 h-[40rem] w-[calc(100vw-2rem)] max-w-md overflow-hidden rounded-[24px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl sm:-mt-16 sm:h-[45rem] sm:w-[85vw] sm:max-w-4xl sm:rounded-[32px] sm:p-4 md:h-[50rem] md:w-[80vw] md:max-w-5xl md:rounded-[40px] md:p-12 lg:max-w-[70vw]"
     >
       <div className="h-full w-full overflow-hidden rounded-xl sm:rounded-2xl md:rounded-2xl p-2 sm:p-4 md:p-8 bg-gray-100 bg-zinc-900">
         {children}
