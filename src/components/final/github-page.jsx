@@ -460,20 +460,6 @@ export const GithubPage = () => {
         </div>
       </div>
 
-      {activeDirectory.files?.length > 0 && (
-        <div className="mb-5 grid gap-3 sm:grid-cols-2">
-          {activeDirectory.files.map((file) => (
-            <div
-              key={file}
-              className="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-950/40 p-3"
-            >
-              <FileText size={16} className="text-purple-300" />
-              <span className="text-sm font-medium text-gray-200">{file}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
       {activeDirectory.type === "profile" && (
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg bg-white/[0.04] p-3">

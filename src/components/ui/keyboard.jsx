@@ -405,6 +405,8 @@ const KeyboardProvider = ({
 }) => {
   const audioContextRef = useRef(null);
   const audioBufferRef = useRef(null);
+  const repeatTimersRef = useRef(new Map());
+  const activeVirtualKeysRef = useRef(new Set());
   const [pressedKeys, setPressedKeys] = useState(new Set());
   const [lastPressedKey, setLastPressedKey] = useState(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
@@ -564,6 +566,73 @@ const KeyboardProvider = ({
     [onKeyPress],
   );
 
+  const clearKeyRepeat = useCallback((keyCode) => {
+    const timers = repeatTimersRef.current.get(keyCode);
+    if (!timers) return;
+
+    window.clearTimeout(timers.delay);
+    window.clearInterval(timers.interval);
+    repeatTimersRef.current.delete(keyCode);
+  }, []);
+
+  const startKeyRepeat = useCallback(
+    (keyCode) => {
+      if (getKeyInputValue(keyCode) === null) return;
+      clearKeyRepeat(keyCode);
+
+      const delay = window.setTimeout(() => {
+        emitKey(keyCode);
+        const interval = window.setInterval(() => {
+          emitKey(keyCode);
+        }, 65);
+
+        repeatTimersRef.current.set(keyCode, { delay, interval });
+      }, 420);
+
+      repeatTimersRef.current.set(keyCode, { delay, interval: null });
+    },
+    [clearKeyRepeat, emitKey],
+  );
+
+  const pressVirtualKey = useCallback(
+    (keyCode) => {
+      if (!keyCode || activeVirtualKeysRef.current.has(keyCode)) return;
+
+      activeVirtualKeysRef.current.add(keyCode);
+      playSoundDown(keyCode);
+      setPressed(keyCode);
+      emitKey(keyCode);
+      startKeyRepeat(keyCode);
+    },
+    [emitKey, playSoundDown, setPressed, startKeyRepeat],
+  );
+
+  const releaseVirtualKey = useCallback(
+    (keyCode) => {
+      if (!keyCode || !activeVirtualKeysRef.current.has(keyCode)) return;
+
+      activeVirtualKeysRef.current.delete(keyCode);
+      clearKeyRepeat(keyCode);
+      playSoundUp(keyCode);
+      setReleased(keyCode);
+    },
+    [clearKeyRepeat, playSoundUp, setReleased],
+  );
+
+  useEffect(() => {
+    const repeatTimers = repeatTimersRef.current;
+    const activeVirtualKeys = activeVirtualKeysRef.current;
+
+    return () => {
+      repeatTimers.forEach((timers) => {
+        window.clearTimeout(timers.delay);
+        window.clearInterval(timers.interval);
+      });
+      repeatTimers.clear();
+      activeVirtualKeys.clear();
+    };
+  }, []);
+
   // Track visibility with IntersectionObserver
   useEffect(() => {
     const element = containerRef.current;
@@ -588,19 +657,26 @@ const KeyboardProvider = ({
     if (!isVisible) return;
 
     const handleKeyDown = (e) => {
-      // Prevent repeat events
-      if (e.repeat) return;
-
       const keyCode = e.code;
-      playSoundDown(keyCode);
-      setPressed(keyCode);
+      const shouldCapture =
+        capturePhysicalKeys &&
+        !isEditableTarget(e.target) &&
+        getKeyInputValue(keyCode) !== null;
 
-      if (capturePhysicalKeys && !isEditableTarget(e.target)) {
-        const value = getKeyInputValue(keyCode);
-        if (value !== null) {
+      if (e.repeat) {
+        if (shouldCapture) {
           e.preventDefault();
           emitKey(keyCode);
         }
+        return;
+      }
+
+      playSoundDown(keyCode);
+      setPressed(keyCode);
+
+      if (shouldCapture) {
+        e.preventDefault();
+        emitKey(keyCode);
       }
     };
 
@@ -635,6 +711,8 @@ const KeyboardProvider = ({
         pressedKeys,
         setPressed,
         setReleased,
+        pressVirtualKey,
+        releaseVirtualKey,
         emitKey,
         lastPressedKey,
         muted,
@@ -1050,44 +1128,26 @@ const Key = ({
   children,
   keyCode,
 }) => {
-  const {
-    playSoundDown,
-    playSoundUp,
-    pressedKeys,
-    setPressed,
-    setReleased,
-    emitKey,
-  } =
+  const { pressedKeys, pressVirtualKey, releaseVirtualKey } =
     useKeyboardSound();
   const isPressed = keyCode ? pressedKeys.has(keyCode) : false;
 
   const handlePointerDown = (event) => {
     event.preventDefault();
-    if (keyCode) {
-      playSoundDown(keyCode);
-      setPressed(keyCode);
-      emitKey(keyCode);
-    }
+    if (keyCode) pressVirtualKey(keyCode);
   };
 
   const handlePointerUp = (event) => {
     event.preventDefault();
-    if (keyCode && isPressed) {
-      playSoundUp(keyCode);
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   const handleMouseLeave = () => {
-    if (keyCode && isPressed) {
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   const handlePointerCancel = () => {
-    if (keyCode) {
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   return (
@@ -1121,44 +1181,26 @@ const Key = ({
 };
 
 const ModifierKey = ({ className, containerClassName, children, keyCode }) => {
-  const {
-    playSoundDown,
-    playSoundUp,
-    pressedKeys,
-    setPressed,
-    setReleased,
-    emitKey,
-  } =
+  const { pressedKeys, pressVirtualKey, releaseVirtualKey } =
     useKeyboardSound();
   const isPressed = keyCode ? pressedKeys.has(keyCode) : false;
 
   const handlePointerDown = (event) => {
     event.preventDefault();
-    if (keyCode) {
-      playSoundDown(keyCode);
-      setPressed(keyCode);
-      emitKey(keyCode);
-    }
+    if (keyCode) pressVirtualKey(keyCode);
   };
 
   const handlePointerUp = (event) => {
     event.preventDefault();
-    if (keyCode && isPressed) {
-      playSoundUp(keyCode);
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   const handleMouseLeave = () => {
-    if (keyCode && isPressed) {
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   const handlePointerCancel = () => {
-    if (keyCode) {
-      setReleased(keyCode);
-    }
+    if (keyCode) releaseVirtualKey(keyCode);
   };
 
   return (
